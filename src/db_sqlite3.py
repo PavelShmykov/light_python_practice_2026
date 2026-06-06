@@ -36,3 +36,44 @@ def init_db():
     conn.commit()
     conn.close()
     print(f"База данных создана: {DB_PATH}")
+
+def demo_db():
+    # Подсоединяемся к файлу БД
+    conn = sqlite3.connect(DB_PATH)
+
+    cursor = conn.cursor()
+
+    # Вставляем тестовую строку в таблицу files
+    cursor.execute("""
+        INSERT OR IGNORE INTO files (path, size, modified_at, extension, status)
+        VALUES ('test/hello.txt', 1024, '2026-06-01 12:00:00', '.txt', 'active')
+    """)
+
+    conn.commit()
+    print("INSERT: добавлена запись test/hello.txt")
+
+    # Читаем все строки из таблицы files
+    cursor.execute("SELECT id, path, size, status FROM files")
+
+    for row in cursor.fetchall():
+        print(f"SELECT: id={row[0]}  path={row[1]}  size={row[2]}  status={row[3]}")
+
+    # Меняем поле status у конкретного файла
+    cursor.execute(
+        "UPDATE files SET status = 'missing' WHERE path = ?",
+        ("test/hello.txt",)
+    )
+    conn.commit()
+    print("UPDATE: статус изменён на missing")
+
+    # SELECT после UPDATE — проверяем что изменение сохранилось
+    cursor.execute("SELECT id, path, status FROM files")
+    for row in cursor.fetchall():
+        print(f"SELECT: id={row[0]}  path={row[1]}  status={row[2]}")
+
+    # Удаляем строку где path совпадает с указанным значением
+    cursor.execute("DELETE FROM files WHERE path = ?", ("test/hello.txt",))
+    conn.commit()
+    print("DELETE: запись удалена")
+
+    conn.close()

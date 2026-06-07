@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import datetime
 
 
 DB_PATH = "data/app.db"
@@ -76,4 +77,28 @@ def demo_db():
     conn.commit()
     print("DELETE: запись удалена")
 
+    conn.close()
+
+def save_files(files):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    # Помечаем все существующие записи как отсутствующие
+    # После сканирования обновим только найденные файлы
+    cursor.execute("UPDATE files SET status = 'missing'")
+
+    for file in files:
+        # Если файл уже есть в базе — обновляем данные
+        # Если нет — добавляем новую запись
+        cursor.execute("""
+            INSERT INTO files (path, size, modified_at, extension, status)
+            VALUES (?, ?, ?, ?, 'active')
+            ON CONFLICT(path) DO UPDATE SET
+                size        = excluded.size,
+                modified_at = excluded.modified_at,
+                extension   = excluded.extension,
+                status      = 'active'
+        """, (file["path"], file["size"], file["modified_at"], file["extension"]))
+
+    conn.commit()
     conn.close()

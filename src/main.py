@@ -31,7 +31,6 @@ def main():
     # Сохраняем результаты в базу данных
     db_sqlite3.save_files(allowed_files)
     db_sqlite3.save_scan_run(folder_path, len(allowed_files))
-    db_sqlite3.print_all_files()
     print("\nЭтап 2 завершён.")
 
 main()

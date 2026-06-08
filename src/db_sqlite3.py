@@ -102,3 +102,18 @@ def save_files(files):
 
     conn.commit()
     conn.close()
+
+def save_scan_run(folder_path, files_count):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    # Записываем факт запуска сканирования
+    scanned_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute(
+        "INSERT INTO scan_runs (folder, scanned_at) VALUES (?, ?)",
+        (folder_path, scanned_at)
+    )
+
+    conn.commit()
+    conn.close()
+    print(f"Запуск сохранён: {folder_path} — {files_count} файлов — {scanned_at}")

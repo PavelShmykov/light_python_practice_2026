@@ -141,3 +141,34 @@ def save_hash(file_path, file_hash):
 
     conn.commit()
     conn.close()
+
+def get_duplicates():
+    # Ищем файлы с одинаковым хэшем — это и есть дубликаты
+    # GROUP BY hash — группируем по хэшу
+    # HAVING COUNT > 1 — оставляем только группы где файлов больше одного
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT hash, path FROM files
+        WHERE hash IS NOT NULL
+        ORDER BY hash
+    """)
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    # Собираем словарь: хэш -> список путей
+    duplicates = {}
+    for hash, path in rows:
+        if hash not in duplicates:
+            duplicates[hash] = []
+        duplicates[hash].append(path)
+
+    # Оставляем только группы где файлов два и больше
+    result = {}
+    for hash, paths in duplicates.items():
+        if len(paths) > 1:
+            result[hash] = paths
+
+    return result

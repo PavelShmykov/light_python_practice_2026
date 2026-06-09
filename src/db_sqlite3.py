@@ -128,3 +128,16 @@ def add_hash_column():
     print("Колонка hash добавлена")
 
     conn.close()
+
+def save_hash(file_path, file_hash):
+    # Сохраняем хэш для конкретного файла
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE files SET hash = ? WHERE path = ?",
+        (file_hash, file_path)
+    )
+
+    conn.commit()
+    conn.close()

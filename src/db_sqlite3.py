@@ -117,3 +117,14 @@ def save_scan_run(folder_path, files_count):
     conn.commit()
     conn.close()
     print(f"Запуск сохранён: {folder_path} — {files_count} файлов — {scanned_at}")
+
+def add_hash_column():
+    # Добавляем колонку hash в таблицу files
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("ALTER TABLE files ADD COLUMN hash TEXT")
+    conn.commit()
+    print("Колонка hash добавлена")
+
+    conn.close()

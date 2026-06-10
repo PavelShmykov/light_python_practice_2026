@@ -223,3 +223,30 @@ def save_backup_check(source_folder, backup_folder, result):
     conn.commit()
     conn.close()
     print(f"Результат проверки сохранён: {checked_at}")
+
+def print_table(table_name):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    # Получаем все записи из указанной таблицы
+    cursor.execute(f"SELECT * FROM {table_name}")
+    rows = cursor.fetchall()
+
+    # Получаем названия колонок
+    columns = [description[0] for description in cursor.description]
+
+    conn.close()
+
+    print(f"\n--- Таблица: {table_name} ---")
+
+    if not rows:
+        print("  Таблица пуста")
+        return
+
+    # Выводим названия колонок
+    print("  " + "  |  ".join(columns))
+    print("  " + "-" * 60)
+
+    # Выводим каждую строку
+    for row in rows:
+        print("  " + "  |  ".join(str(value) for value in row))

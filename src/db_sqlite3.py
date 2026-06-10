@@ -191,3 +191,35 @@ def init_backup_table():
 
     conn.commit()
     conn.close()
+
+def save_backup_check(source_folder, backup_folder, result):
+    # Сохраняем результаты сравнения в базу
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    checked_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Сохраняем отсутствующие файлы
+    for path in result["missing"]:
+        cursor.execute(
+            "INSERT INTO backup_checks (checked_at, source, backup, status, path) VALUES (?, ?, ?, ?, ?)",
+            (checked_at, source_folder, backup_folder, "missing", path)
+        )
+
+    # Сохраняем лишние файлы
+    for path in result["extra"]:
+        cursor.execute(
+            "INSERT INTO backup_checks (checked_at, source, backup, status, path) VALUES (?, ?, ?, ?, ?)",
+            (checked_at, source_folder, backup_folder, "extra", path)
+        )
+
+    # Сохраняем изменённые файлы
+    for path in result["changed"]:
+        cursor.execute(
+            "INSERT INTO backup_checks (checked_at, source, backup, status, path) VALUES (?, ?, ?, ?, ?)",
+            (checked_at, source_folder, backup_folder, "changed", path)
+        )
+
+    conn.commit()
+    conn.close()
+    print(f"Результат проверки сохранён: {checked_at}")

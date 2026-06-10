@@ -172,3 +172,22 @@ def get_duplicates():
             result[hash] = paths
 
     return result
+
+def init_backup_table():
+    # Создаём таблицу для хранения результатов проверки бэкапа
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS backup_checks (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            checked_at TEXT NOT NULL,
+            source     TEXT NOT NULL,
+            backup     TEXT NOT NULL,
+            status     TEXT NOT NULL,  -- missing / extra / changed
+            path       TEXT NOT NULL
+        )
+    """)
+
+    conn.commit()
+    conn.close()

@@ -1,6 +1,6 @@
 import os
 import scanner
-
+import hasher
 
 def compare_folders(source_folder, backup_folder):
     # Сканируем исходную папку
@@ -22,11 +22,22 @@ def compare_folders(source_folder, backup_folder):
     # Файлы которые есть в backup но нет в source
     extra = sorted([p for p in backup_files if p not in source_files])
 
-    # Файлы которые есть в обоих — но размер отличается
-    changed = sorted([
-        p for p in source_files
-        if p in backup_files and source_files[p] != backup_files[p]
-    ])
+    # Файлы, которые есть в обоих папках (пересечение путей)
+    common_paths = set(source_files.keys()) & set(backup_files.keys())
+
+    # Проверка на изменение содержимого: сначала по размеру, затем по хэшу
+    changed = []
+    for path in common_paths:
+        if source_files[path] != backup_files[path]:
+            changed.append(path)
+
+        else:
+            # Размеры совпали, нужно сравнить хэши
+            hash_source = hasher.get_hash(os.path.join(source_folder, path))
+            hash_backup = hasher.get_hash(os.path.join(backup_folder, path))
+
+            if hash_source != hash_backup:
+                changed.append(path)
 
     return {
         "missing": missing,

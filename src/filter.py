@@ -1,16 +1,12 @@
 import os
 
-
-# Расширения которые пропускаем при сканировании
-SKIP_EXTENSIONS = {".tmp", ".log", ".sys"}
+DEFAULT_SKIP_EXTENSIONS = {".tmp", ".log", ".sys", ".md"}
 
 
-def is_allowed(file_name):
-    # Получаем расширение файла в нижнем регистре
+def is_allowed(file_name, skip_extensions=DEFAULT_SKIP_EXTENSIONS):
     extension = os.path.splitext(file_name)[1].lower()
 
-    # Возвращаем False если расширение в списке запрещённых
-    if extension in SKIP_EXTENSIONS:
+    if extension in skip_extensions:
         return False
 
     return True
